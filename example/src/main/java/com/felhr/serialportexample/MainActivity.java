@@ -14,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,7 +50,8 @@ public class MainActivity extends AppCompatActivity {
     };
     private UsbService usbService;
     private TextView display;
-    private EditText editText;
+    private TextView textView2;
+    private SeekBar seekBar1;
     private MyHandler mHandler;
     private final ServiceConnection usbConnection = new ServiceConnection() {
         @Override
@@ -72,19 +74,38 @@ public class MainActivity extends AppCompatActivity {
         mHandler = new MyHandler(this);
 
         display = (TextView) findViewById(R.id.textView1);
-        editText = (EditText) findViewById(R.id.editText1);
-        Button sendButton = (Button) findViewById(R.id.buttonSend);
-        sendButton.setOnClickListener(new View.OnClickListener() {
+        textView2 = (TextView) findViewById(R.id.textView2);
+        seekBar1 = (SeekBar)findViewById(R.id.seekBar1);
+
+        seekBar1.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onClick(View v) {
-                if (!editText.getText().toString().equals("")) {
-                    String data = editText.getText().toString();
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                textView2.setText(Integer.toString(i));
+                //m_val = (byte)(i - 45);
+                if (!textView2.getText().toString().equals("")) {
+                    String data = textView2.getText().toString();
                     if (usbService != null) { // if UsbService was correctly binded, Send data
                         usbService.write(data.getBytes());
                     }
                 }
             }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                //ShowMsg("Horizontal Calibrating ...");
+                //m_cmd = UART_CMD.HCali_ON;
+                //m_val = (byte)(sb_hCalibration.getProgress() - 45);
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
         });
+
+
+
+
     }
 
     @Override

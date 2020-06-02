@@ -27,27 +27,33 @@
         android:scrollbars="vertical"
         android:gravity="bottom" />
 
-    <EditText
-        android:id="@+id/editText1"
+    <TextView
+        android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/textView1"
         android:layout_alignRight="@+id/textView1"
         android:layout_below="@+id/textView1"
         android:layout_marginTop="28dp"
-        android:ems="10">
+        android:ems="10"
+        android:gravity="center"
+        android:textSize="24sp">
 
-        <requestFocus/>
-    </EditText>
+        <requestFocus />
+    </TextView>
 
-    <Button
-        android:id="@+id/buttonSend"
-        style="?borderlessButtonStyle"
+
+    <SeekBar
+        android:id="@+id/seekBar1"
+        style="@style/Widget.AppCompat.SeekBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/editText1"
-        android:layout_alignRight="@+id/editText1"
-        android:layout_below="@+id/editText1"
-        android:layout_marginTop="42dp"
-        android:text="Send"/>
+        android:layout_alignLeft="@+id/textView2"
+        android:layout_alignRight="@+id/textView2"
+        android:layout_below="@+id/textView2"
+        android:layout_marginTop="100dp"
+        android:max="100"
+        android:progress="50"
+        android:visibility="visible" />
+
 </RelativeLayout>
