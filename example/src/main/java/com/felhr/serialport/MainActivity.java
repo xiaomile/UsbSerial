@@ -1,4 +1,4 @@
-package com.felhr.serialportexample;
+package com.felhr.serialport;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -14,6 +14,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.hardware.SensorManager;
+import android.hardware.SensorEventListener;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -51,8 +55,12 @@ public class MainActivity extends AppCompatActivity {
     private UsbService usbService;
     private TextView display;
     private TextView textView2;
+    private TextView accelerometerView;
+    private TextView gyroscopeView;
     private SeekBar seekBar1;
     private MyHandler mHandler;
+    private SensorManager sensorManager;
+    private MySensorEventListener sensorEventListener;
     private final ServiceConnection usbConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName arg0, IBinder arg1) {
@@ -70,11 +78,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        sensorEventListener = new MySensorEventListener();
         mHandler = new MyHandler(this);
-
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         display = (TextView) findViewById(R.id.textView1);
         textView2 = (TextView) findViewById(R.id.textView2);
+        accelerometerView = (TextView) findViewById(R.id.textView3);
+        gyroscopeView = (TextView) findViewById(R.id.textView4);
         seekBar1 = (SeekBar)findViewById(R.id.seekBar1);
 
         seekBar1.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -83,7 +93,8 @@ public class MainActivity extends AppCompatActivity {
                 textView2.setText(Integer.toString(i));
                 //m_val = (byte)(i - 45);
                 if (!textView2.getText().toString().equals("")) {
-                    String data = textView2.getText().toString();
+                    String data = (char)Integer.parseInt(textView2.getText().toString())+"";
+                    //System.out.println(data);
                     if (usbService != null) { // if UsbService was correctly binded, Send data
                         usbService.write(data.getBytes());
                     }
@@ -110,6 +121,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onResume() {
+        Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorManager.registerListener(sensorEventListener, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        Sensor gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        sensorManager.registerListener(sensorEventListener, gyroscope, SensorManager.SENSOR_DELAY_NORMAL);
         super.onResume();
         setFilters();  // Start listening notifications from UsbService
         startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and Bind it
@@ -118,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
+        sensorManager.unregisterListener(sensorEventListener);
         unregisterReceiver(mUsbReceiver);
         unbindService(usbConnection);
     }
@@ -163,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
             switch (msg.what) {
                 case UsbService.MESSAGE_FROM_SERIAL_PORT:
                     String data = (String) msg.obj;
-                    mActivity.get().display.append(data);
+                    mActivity.get().display.setText(data);
                     break;
                 case UsbService.CTS_CHANGE:
                     Toast.makeText(mActivity.get(), "CTS_CHANGE",Toast.LENGTH_LONG).show();
@@ -172,6 +188,35 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(mActivity.get(), "DSR_CHANGE",Toast.LENGTH_LONG).show();
                     break;
             }
+        }
+    }
+
+    private final class MySensorEventListener implements SensorEventListener
+    {
+        //可以得到传感器实时测量出来的变化值
+        @Override
+        public void onSensorChanged(SensorEvent event)
+        {
+            //得到方向的值
+            if(event.sensor.getType()==Sensor.TYPE_ACCELEROMETER)
+            {
+                float x = event.values[SensorManager.DATA_X];
+                float y = event.values[SensorManager.DATA_Y];
+                float z = event.values[SensorManager.DATA_Z];
+                accelerometerView.setText("Accelerometer: " + String.format("%.4f",x) + ", " + String.format("%.4f",y) + ", " + String.format("%.4f",z));
+            }
+            else if(event.sensor.getType()==Sensor.TYPE_GYROSCOPE){
+                float x = event.values[SensorManager.DATA_X];
+                float y = event.values[SensorManager.DATA_Y];
+                float z = event.values[SensorManager.DATA_Z];
+                gyroscopeView.setText("Gyroscope: " + String.format("%.4f",x) + ", " + String.format("%.4f",y) + ", " + String.format("%.4f",z));
+            }
+
+        }
+        //重写变化
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy)
+        {
         }
     }
 }

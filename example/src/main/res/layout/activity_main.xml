@@ -6,7 +6,7 @@
                 android:paddingLeft="@dimen/activity_horizontal_margin"
                 android:paddingRight="@dimen/activity_horizontal_margin"
                 android:paddingTop="@dimen/activity_vertical_margin"
-                tools:context="com.felhr.serialportexample.MainActivity">
+                tools:context="com.felhr.serialport.MainActivity">
 
     <TextView
         android:id="@+id/textViewTitle"
@@ -38,8 +38,30 @@
         android:ems="10"
         android:gravity="center"
         android:textSize="24sp">
-
-        <requestFocus />
+    </TextView>
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textView1"
+        android:layout_alignRight="@+id/textView1"
+        android:layout_below="@+id/textView2"
+        android:layout_marginTop="28dp"
+        android:ems="10"
+        android:gravity="center"
+        android:textSize="14sp">
+    </TextView>
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textView1"
+        android:layout_alignRight="@+id/textView1"
+        android:layout_below="@+id/textView3"
+        android:layout_marginTop="28dp"
+        android:ems="10"
+        android:gravity="center"
+        android:textSize="14sp">
     </TextView>
 
 
@@ -50,8 +72,8 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/textView2"
         android:layout_alignRight="@+id/textView2"
-        android:layout_below="@+id/textView2"
-        android:layout_marginTop="100dp"
+        android:layout_below="@+id/textView4"
+        android:layout_marginTop="50dp"
         android:max="100"
         android:progress="50"
         android:visibility="visible" />

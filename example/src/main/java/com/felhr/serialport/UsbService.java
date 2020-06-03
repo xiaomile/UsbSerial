@@ -1,4 +1,4 @@
-package com.felhr.serialportexample;
+package com.felhr.serialport;
 
 import android.app.PendingIntent;
 import android.app.Service;
