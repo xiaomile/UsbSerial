@@ -13,7 +13,7 @@ import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.CompoundButton;
 import android.hardware.SensorManager;
 import android.hardware.SensorEventListener;
 import android.hardware.Sensor;
@@ -21,8 +21,11 @@ import android.hardware.SensorEvent;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Switch;
 
 import java.lang.ref.WeakReference;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
@@ -56,11 +59,13 @@ public class MainActivity extends AppCompatActivity {
     private TextView display;
     private TextView textView2;
     private TextView accelerometerView;
-    private TextView gyroscopeView;
     private SeekBar seekBar1;
     private MyHandler mHandler;
     private SensorManager sensorManager;
     private MySensorEventListener sensorEventListener;
+    private Switch sensorSwitch;
+    private Map<String, String> jsonstrlist = new HashMap<String,String>();
+    private boolean sensorIsOn = false;
     private final ServiceConnection usbConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName arg0, IBinder arg1) {
@@ -84,9 +89,22 @@ public class MainActivity extends AppCompatActivity {
         display = (TextView) findViewById(R.id.textView1);
         textView2 = (TextView) findViewById(R.id.textView2);
         accelerometerView = (TextView) findViewById(R.id.textView3);
-        gyroscopeView = (TextView) findViewById(R.id.textView4);
         seekBar1 = (SeekBar)findViewById(R.id.seekBar1);
+        sensorSwitch = (Switch)findViewById(R.id.switch2);
 
+        sensorSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+            @Override
+
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked)sensorIsOn=true;
+                else sensorIsOn=false;
+                if(!buttonView.isPressed()){ // 每次 setChecked 时会触发onCheckedChanged 监听回调，而有时我们在设置setChecked后不想去自动触发 onCheckedChanged 里的具体操作, 即想屏蔽掉onCheckedChanged;加上此判断
+
+                }
+
+            }
+        });
         seekBar1.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -194,24 +212,39 @@ public class MainActivity extends AppCompatActivity {
     private final class MySensorEventListener implements SensorEventListener
     {
         //可以得到传感器实时测量出来的变化值
+
         @Override
         public void onSensorChanged(SensorEvent event)
         {
+            //ArrayList<String> jsonstrlist = new ArrayList<String>();
+            String jsonresult = "";
             //得到方向的值
             if(event.sensor.getType()==Sensor.TYPE_ACCELEROMETER)
             {
                 float x = event.values[SensorManager.DATA_X];
                 float y = event.values[SensorManager.DATA_Y];
                 float z = event.values[SensorManager.DATA_Z];
-                accelerometerView.setText("Accelerometer: " + String.format("%.4f",x) + ", " + String.format("%.4f",y) + ", " + String.format("%.4f",z));
+                //accelerometerView.setText("a: " + String.format("%.4f",x) + ", " + String.format("%.4f",y) + ", " + String.format("%.4f",z));
+                //jsonstrlist.add("\"a\": [" + String.format("%.4f",x) + ", " + String.format("%.4f",y) + ", " + String.format("%.4f",z)+"]");
+                jsonstrlist.put("\"a\"","[" + String.format("%.4f",x) + ", " + String.format("%.4f",y) + ", " + String.format("%.4f",z)+"]");
             }
             else if(event.sensor.getType()==Sensor.TYPE_GYROSCOPE){
                 float x = event.values[SensorManager.DATA_X];
                 float y = event.values[SensorManager.DATA_Y];
                 float z = event.values[SensorManager.DATA_Z];
-                gyroscopeView.setText("Gyroscope: " + String.format("%.4f",x) + ", " + String.format("%.4f",y) + ", " + String.format("%.4f",z));
+                //gyroscopeView.setText("g: " + String.format("%.4f",x) + ", " + String.format("%.4f",y) + ", " + String.format("%.4f",z));
+                //jsonstrlist.add("\"g\": [" + String.format("%.4f",x) + ", " + String.format("%.4f",y) + ", " + String.format("%.4f",z)+"]");
+                jsonstrlist.put("\"g\"","[" + String.format("%.4f",x) + ", " + String.format("%.4f",y) + ", " + String.format("%.4f",z)+"]");
             }
-
+            int i = 0;
+            for(String key:jsonstrlist.keySet()){
+                if(i==0)jsonresult+=key+":"+jsonstrlist.get(key);
+                else jsonresult+=","+key+":"+jsonstrlist.get(key);
+                i++;
+            }
+            if(sensorIsOn) {
+                accelerometerView.setText("{" + jsonresult + "}");
+            }
         }
         //重写变化
         @Override
