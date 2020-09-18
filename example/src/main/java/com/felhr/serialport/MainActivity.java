@@ -64,8 +64,10 @@ public class MainActivity extends AppCompatActivity {
     private SensorManager sensorManager;
     private MySensorEventListener sensorEventListener;
     private Switch sensorSwitch;
+    private Switch outputSwitch;
     private Map<String, String> jsonstrlist = new HashMap<String,String>();
     private boolean sensorIsOn = false;
+    private boolean outputState = false;
     private final ServiceConnection usbConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName arg0, IBinder arg1) {
@@ -91,7 +93,21 @@ public class MainActivity extends AppCompatActivity {
         accelerometerView = (TextView) findViewById(R.id.textView3);
         seekBar1 = (SeekBar)findViewById(R.id.seekBar1);
         sensorSwitch = (Switch)findViewById(R.id.switch2);
+        outputSwitch = (Switch)findViewById(R.id.switch1);
 
+        outputSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+            @Override
+
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked)outputState=false;
+                else outputState=true;
+                if(!buttonView.isPressed()){ // 每次 setChecked 时会触发onCheckedChanged 监听回调，而有时我们在设置setChecked后不想去自动触发 onCheckedChanged 里的具体操作, 即想屏蔽掉onCheckedChanged;加上此判断
+
+                }
+
+            }
+        });
         sensorSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
             @Override
@@ -113,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
                 if (!textView2.getText().toString().equals("")) {
                     String data = (char)Integer.parseInt(textView2.getText().toString())+"";
                     //System.out.println(data);
-                    if (usbService != null) { // if UsbService was correctly binded, Send data
+                    if (usbService != null&&outputState) { // if UsbService was correctly binded, Send data
                         usbService.write(data.getBytes());
                     }
                 }
@@ -131,9 +147,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
-
-
 
     }
 
@@ -244,6 +257,13 @@ public class MainActivity extends AppCompatActivity {
             }
             if(sensorIsOn) {
                 accelerometerView.setText("{" + jsonresult + "}");
+                if (!accelerometerView.getText().toString().equals("")) {
+                    String data = accelerometerView.getText().toString().toCharArray()+"";
+                    //System.out.println(data);
+                    if (usbService != null&&!outputState) { // if UsbService was correctly binded, Send data
+                        usbService.write(data.getBytes());
+                    }
+                }
             }
         }
         //重写变化
